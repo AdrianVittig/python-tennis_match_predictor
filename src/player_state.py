@@ -15,6 +15,7 @@ def create_player_state() -> dict:
             "Grass": [],
         },
         "service_metrics_history": [],
+        "return_metrics_history": []
     }
 
 def get_or_create_player_state(
@@ -229,3 +230,38 @@ def update_service_metrics_history(
 
     if len(service_metrics_history) > max_size:
         service_metrics_history.pop(0)
+
+def calculate_average_return_metrics(
+        return_metrics_history: list[dict[str, float]],
+        window: int = 10
+) -> float:
+    recent_metrics = return_metrics_history[-window:]
+    if not recent_metrics:
+        return 0.0
+
+    total_return_points_won = sum(
+        match["return_points_won"]
+        for match in recent_metrics
+    )
+
+    total_return_points = sum(
+        match["return_points_total"]
+        for match in recent_metrics
+    )
+
+    if total_return_points == 0:
+        return 0.0
+
+    return total_return_points_won / total_return_points
+
+def update_return_metrics_history(
+        return_metrics_history: list[dict[str, float]],
+        return_metrics: dict[str, float],
+        max_size: int = 20
+) -> None:
+    return_metrics_history.append(return_metrics)
+
+    if len(return_metrics_history) > max_size:
+        return_metrics_history.pop(0)
+
+

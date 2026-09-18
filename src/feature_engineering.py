@@ -475,3 +475,36 @@ def calculate_service_metrics(
         "second_serve_points_won_percentage": second_serve_points_won_percentage,
         "break_points_saved_percentage": break_points_saved_percentage,
     }
+
+def calculate_return_metrics(
+        row: pd.Series,
+        opponent_prefix: str
+) -> dict[str, float] | None:
+    opponent_service_points = row[f"{opponent_prefix}_svpt"]
+    opponent_first_serve_points_won = row[f"{opponent_prefix}_1stWon"]
+    opponent_second_serve_points_won = row[f"{opponent_prefix}_2ndWon"]
+
+    if pd.isna(opponent_service_points) or opponent_service_points == 0:
+        return None
+
+    if pd.isna(opponent_first_serve_points_won):
+        return None
+
+    if pd.isna(opponent_second_serve_points_won):
+        return None
+
+    return_points_won = (
+        opponent_service_points - opponent_first_serve_points_won
+        - opponent_second_serve_points_won
+    )
+
+    return_points_won_rate = (
+        return_points_won / opponent_service_points
+    )
+
+    return {
+        "return_points_won": return_points_won,
+        "return_points_total": opponent_service_points,
+        "return_points_won_rate": return_points_won_rate
+    }
+
